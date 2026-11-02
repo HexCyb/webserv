@@ -1,0 +1,5 @@
+{
+  "project": "webserv",
+  "language": "C++98",
+  "methods": ["GET", "HEAD", "POST", "DELETE"]
+}
