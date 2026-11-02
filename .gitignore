@@ -1,0 +1,4 @@
+webserv
+obj/
+www/uploads/*
+!www/uploads/.gitkeep
