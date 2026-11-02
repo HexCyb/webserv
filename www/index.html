@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>webserv</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font: 15px/1.6 ui-monospace, Menlo, Consolas, monospace; background: #0d1117; color: #c9d1d9;
+         max-width: 760px; margin: 48px auto; padding: 0 16px; }
+  h1 { color: #f0f6fc; font-size: 26px; margin-bottom: 0; }
+  h2 { color: #f0f6fc; font-size: 16px; margin-top: 36px; border-bottom: 1px solid #21262d; padding-bottom: 6px; }
+  a { color: #58a6ff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .muted { color: #8b949e; }
+  li { margin: 4px 0; }
+  form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  input, button { font: inherit; background: #161b22; color: inherit; border: 1px solid #30363d;
+                  border-radius: 6px; padding: 6px 10px; }
+  button { cursor: pointer; background: #238636; border-color: #2ea043; color: #fff; }
+  pre { background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 12px; overflow-x: auto; }
+  code { color: #7ee787; }
+</style>
+</head>
+<body>
+  <h1>webserv</h1>
+  <p class="muted">HTTP/1.1 server written in C++98 &middot; one poll() loop &middot; non-blocking I/O</p>
+
+  <h2>Try it</h2>
+  <ul>
+    <li><a href="/files/">/files/</a> <span class="muted">directory listing (autoindex)</span></li>
+    <li><a href="/uploads/">/uploads/</a> <span class="muted">files uploaded from this page</span></li>
+    <li><a href="/cgi-bin/hello.py?name=42">/cgi-bin/hello.py?name=42</a> <span class="muted">Python CGI</span></li>
+    <li><a href="/cgi-bin/time.sh">/cgi-bin/time.sh</a> <span class="muted">shell CGI</span></li>
+    <li><a href="/old">/old</a> <span class="muted">301 redirect back here</span></li>
+    <li><a href="/does-not-exist">/does-not-exist</a> <span class="muted">custom 404 page</span></li>
+  </ul>
+
+  <h2>Upload files</h2>
+  <form action="/uploads" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" multiple required>
+    <button type="submit">Upload</button>
+  </form>
+
+  <h2>POST to a CGI script</h2>
+  <form action="/cgi-bin/echo.py" method="post">
+    <input type="text" name="message" placeholder="hello from the browser" required>
+    <button type="submit">Send</button>
+  </form>
+
+  <h2>From a terminal</h2>
+<pre><code>curl --data-binary @notes.txt http://localhost:8080/uploads/notes.txt
+curl -X DELETE http://localhost:8080/uploads/notes.txt
+curl -H "Host: blog.local" http://localhost:8080/
+curl -H "Transfer-Encoding: chunked" -d "hello" http://localhost:8080/cgi-bin/echo.py</code></pre>
+</body>
+</html>
