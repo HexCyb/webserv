@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: build + tests (${{ matrix.cxx }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cxx: [g++, clang++]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build with -Wall -Wextra -Werror -std=c++98
+        run: make CXX=${{ matrix.cxx }}
+      - name: Integration tests (25 curl checks)
+        run: make test CXX=${{ matrix.cxx }}
+
+  sanitizers:
+    name: AddressSanitizer + UBSan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Integration tests on a sanitized build
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: make test CXXFLAGS="-Wall -Wextra -Werror -std=c++98 -Iinclude -g -fsanitize=address,undefined -fno-omit-frame-pointer"
+      - name: No sanitizer report in the server log
+        run: "! grep -E 'ERROR: AddressSanitizer|runtime error' /tmp/webserv-test.log"
+
+  load:
+    name: load test (10,000 requests, 200 clients)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: make
+      - name: Start the server
+        run: |
+          ./webserv conf/default.conf > /tmp/webserv.log 2>&1 &
+          for _ in $(seq 1 50); do curl -s -o /dev/null http://127.0.0.1:8080/ && exit 0; sleep 0.1; done
+          cat /tmp/webserv.log; exit 1
+      - name: 200 parallel clients x 50 requests, every answer must be 200 OK
+        run: python3 tests/stress.py 200 50
