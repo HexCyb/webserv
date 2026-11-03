@@ -1,5 +1,7 @@
 # webserv
 
+[![CI](https://github.com/HexCyb/webserv/actions/workflows/ci.yml/badge.svg)](https://github.com/HexCyb/webserv/actions/workflows/ci.yml)
+
 An HTTP/1.1 web server written from scratch in **C++98**. A single `poll()` loop drives non-blocking sockets and CGI pipes, and an nginx-style config file sets up servers, ports, virtual hosts and per-location rules.
 
 > Originally completed at **42 Türkiye** as part of the common core. This repository is a 2026 rewrite, because the original code was lost.
@@ -97,3 +99,11 @@ conf/      default.conf: 3 servers, 2 ports, a virtual host
 www/       demo site: index, error pages, files/, uploads/, cgi-bin/
 tests/     run_tests.sh (curl) · stress.py (load test)
 ```
+
+## Continuous integration
+
+Every push runs [GitHub Actions](https://github.com/HexCyb/webserv/actions/workflows/ci.yml) (`.github/workflows/ci.yml`):
+
+- **build + tests** with `g++` and `clang++`: `-Wall -Wextra -Werror -std=c++98`, then the 25 curl checks in `tests/run_tests.sh`
+- **AddressSanitizer + UBSan**: the same checks on a sanitized build; the job fails on any sanitizer report
+- **load test**: `tests/stress.py` sends 10,000 requests from 200 parallel clients; every answer must be `200 OK`
